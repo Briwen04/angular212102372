@@ -12,6 +12,8 @@ declare const moment : any;
 
 export class CuacaComponent implements OnInit, AfterViewInit {
   private table1: any;
+  formattedSunrise: string = '';
+  formattedSunset: string = '';
 
   constructor(private renderer : Renderer2, private http : HttpClient) {}
   
@@ -59,6 +61,32 @@ export class CuacaComponent implements OnInit, AfterViewInit {
     );
     
     this.bind_table1();
+    this.bindSunriseSunset();
+  }
+
+  bindSunriseSunset(): void {
+    this.http
+      .get('https://api.openweathermap.org/data/2.5/weather?id=1630789&appid=df9cc5c8351c3c40f20ed31601b8534b')
+      .subscribe((data: any) => {
+        console.log(data);
+  
+        if (data.sys && data.sys.sunrise && data.sys.sunset) {
+          const sunriseTimestamp = data.sys.sunrise;
+          const sunsetTimestamp = data.sys.sunset;
+  
+          this.formattedSunrise = this.formatTimestamp(sunriseTimestamp);
+          this.formattedSunset = this.formatTimestamp(sunsetTimestamp);
+  
+        } else {
+          console.error('Error: Sunrise or sunset data not available in the response.');
+        }
+      });
+  }
+  
+
+  formatTimestamp(timestamp: number): string {
+    const formattedTime = moment(timestamp * 1000).format('DD-MM-YYYY HH:mm:ss');
+    return formattedTime;
   }
 
   bind_table1(): void {
